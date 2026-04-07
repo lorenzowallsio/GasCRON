@@ -24,6 +24,7 @@ final class FeedTransformer
             }
 
             $titleElement = $this->findFirstDirectChild($clone, 'title');
+            $originalTitle = $titleElement === null ? '' : trim($titleElement->textContent);
             $description = $this->findFirstChildText($clone, 'description');
 
             if ($description === '' && $skipItemsWithEmptyTitle) {
@@ -66,7 +67,7 @@ final class FeedTransformer
                 }
             }
 
-            $this->replaceElementText($authorElement, $description);
+            $this->replaceElementText($authorElement, $originalTitle);
             $transformed[] = $clone;
         }
 

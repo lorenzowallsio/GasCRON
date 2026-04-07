@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 final class FeedTransformerTest extends TestCase
 {
-    public function testTransformCreatesAuthorAndReplacesTitleWithDescription(): void
+    public function testTransformMovesOriginalTitleToAuthorAndReplacesTitleWithDescription(): void
     {
         $xml = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -42,7 +42,7 @@ XML;
         self::assertCount(1, $transformed);
         $author = $this->findDirectChild($transformed[0], 'author');
         self::assertInstanceOf(DOMElement::class, $author);
-        self::assertSame('Replacement description', $author->textContent);
+        self::assertSame('Original title', $author->textContent);
         self::assertSame('Replacement description', $this->findDirectChild($transformed[0], 'title')?->textContent);
         self::assertSame('Replacement description', $this->findDirectChild($transformed[0], 'description')?->textContent);
     }
@@ -80,7 +80,7 @@ XML;
         ));
     }
 
-    public function testTransformCanKeepBlankDescriptionAndWriteEmptyTitleAndAuthorWhenConfigured(): void
+    public function testTransformCanKeepBlankDescriptionAndPreserveOriginalTitleInAuthorWhenConfigured(): void
     {
         $xml = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -108,7 +108,7 @@ XML;
 
         self::assertCount(1, $transformed);
         self::assertSame('', $this->findDirectChild($transformed[0], 'title')?->textContent);
-        self::assertSame('', $this->findDirectChild($transformed[0], 'author')?->textContent);
+        self::assertSame('Original', $this->findDirectChild($transformed[0], 'author')?->textContent);
     }
 
     private function findDirectChild(DOMElement $parent, string $localName): ?DOMElement

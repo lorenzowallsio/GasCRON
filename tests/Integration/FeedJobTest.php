@@ -67,21 +67,29 @@ final class FeedJobTest extends TestCase
         $items = $document->getElementsByTagName('item');
         self::assertCount(5, $items);
 
+        $expectedAuthors = [
+            'First published',
+            'Second published',
+            'Third published',
+            'Fourth published',
+            'Fifth published',
+        ];
+
         $firstItem = $items->item(0);
         self::assertInstanceOf(DOMElement::class, $firstItem);
         self::assertSame('First item description.', $this->findDirectChildText($firstItem, 'title'));
-        self::assertSame('First item description.', $this->findDirectChildText($firstItem, 'author'));
+        self::assertSame('First published', $this->findDirectChildText($firstItem, 'author'));
         self::assertSame('First item description.', $this->findDirectChildText($firstItem, 'description'));
 
-        foreach ($items as $item) {
+        foreach ($items as $index => $item) {
             self::assertInstanceOf(DOMElement::class, $item);
-            self::assertSame(
-                $this->findDirectChildText($item, 'title'),
-                $this->findDirectChildText($item, 'author')
-            );
             self::assertSame(
                 $this->findDirectChildText($item, 'description'),
                 $this->findDirectChildText($item, 'title')
+            );
+            self::assertSame(
+                $expectedAuthors[$index],
+                $this->findDirectChildText($item, 'author')
             );
         }
 

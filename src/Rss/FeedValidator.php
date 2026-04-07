@@ -68,11 +68,18 @@ final class FeedValidator
 
         foreach ($items as $index => $item) {
             $title = $this->findFirstChildText($item, 'title');
+            $description = $this->findFirstChildText($item, 'description');
             $author = $this->findFirstChildText($item, 'author');
 
-            if ($title !== $author) {
+            if ($title !== $description) {
                 throw new FeedValidationException(
-                    sprintf('Generated item %d has author/title mismatch.', $index + 1)
+                    sprintf('Generated item %d has title/description mismatch.', $index + 1)
+                );
+            }
+
+            if ($author === '') {
+                throw new FeedValidationException(
+                    sprintf('Generated item %d is missing an author value.', $index + 1)
                 );
             }
         }

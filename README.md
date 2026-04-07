@@ -1,6 +1,6 @@
 # RSS Cron Feed Publisher
 
-This project fetches an upstream RSS feed once per day, keeps the latest 5 items by `pubDate`, replaces each selected item's `title` with its `description`, rewrites `author` to match that transformed `title`, and publishes the transformed RSS output for Walls.io.
+This project fetches an upstream RSS feed once per day, keeps the latest 5 items by `pubDate`, replaces each selected item's `title` with its `description`, rewrites `author` to the original `title`, and publishes the transformed RSS output for Walls.io.
 
 ## Requirements
 
