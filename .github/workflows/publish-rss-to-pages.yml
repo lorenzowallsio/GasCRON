@@ -1,0 +1,138 @@
+name: Publish RSS Feed to GitHub Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+  schedule:
+    - cron: '0 2 * * *'
+      timezone: 'Europe/Vienna'
+
+concurrency:
+  group: github-pages-rss-feed
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          coverage: none
+          extensions: curl, dom, libxml
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Resolve feed environment
+        id: feed
+        env:
+          CUSTOM_RSS_SOURCE_URL: ${{ vars.RSS_SOURCE_URL }}
+          CUSTOM_PUBLIC_FEED_URL: ${{ vars.RSS_PUBLIC_FEED_URL }}
+          CUSTOM_FETCH_TIMEOUT_SECONDS: ${{ vars.RSS_FETCH_TIMEOUT_SECONDS }}
+          CUSTOM_SKIP_ITEMS_WITH_EMPTY_TITLE: ${{ vars.RSS_SKIP_ITEMS_WITH_EMPTY_TITLE }}
+          CUSTOM_REQUEST_HEADERS_JSON: ${{ vars.RSS_REQUEST_HEADERS_JSON }}
+          CUSTOM_LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p "${GITHUB_WORKSPACE}/build/pages/feeds"
+
+          source_url="${CUSTOM_RSS_SOURCE_URL:-https://customers.pressrelations.de/apps/nrx/bff/export/media_review/d70a6efc-7373-4f16-b6c5-7ec575b843f5}"
+          output_path="${GITHUB_WORKSPACE}/build/pages/feeds/gasconnect.xml"
+          fetch_timeout="${CUSTOM_FETCH_TIMEOUT_SECONDS:-15}"
+          skip_empty_title="${CUSTOM_SKIP_ITEMS_WITH_EMPTY_TITLE:-true}"
+          request_headers_json="${CUSTOM_REQUEST_HEADERS_JSON:-{}}"
+          log_level="${CUSTOM_LOG_LEVEL:-info}"
+
+          public_url="${CUSTOM_PUBLIC_FEED_URL:-}"
+          if [[ -z "${public_url}" ]]; then
+            owner="${GITHUB_REPOSITORY_OWNER}"
+            repo="${GITHUB_REPOSITORY#${owner}/}"
+
+            if [[ "${repo,,}" == "${owner,,}.github.io" ]]; then
+              public_url="https://${owner}.github.io/feeds/gasconnect.xml"
+            else
+              public_url="https://${owner}.github.io/${repo}/feeds/gasconnect.xml"
+            fi
+          fi
+
+          {
+            echo "RSS_SOURCE_URL=${source_url}"
+            echo "RSS_OUTPUT_PATH=${output_path}"
+            echo "RSS_PUBLIC_FEED_URL=${public_url}"
+            echo "RSS_TIMEZONE=Europe/Vienna"
+            echo "RSS_CRON_SCHEDULE=0 2 * * *"
+            echo "RSS_FETCH_TIMEOUT_SECONDS=${fetch_timeout}"
+            echo "RSS_SKIP_ITEMS_WITH_EMPTY_TITLE=${skip_empty_title}"
+            echo "LOG_LEVEL=${log_level}"
+            echo "PAGES_OUTPUT_DIR=${GITHUB_WORKSPACE}/build/pages"
+            echo "PAGES_FEED_URL=${public_url}"
+          } >> "${GITHUB_ENV}"
+
+          {
+            echo "RSS_REQUEST_HEADERS_JSON<<__JSON__"
+            echo "${request_headers_json}"
+            echo "__JSON__"
+          } >> "${GITHUB_ENV}"
+
+          echo "public_url=${public_url}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run test suite
+        run: composer test
+
+      - name: Generate transformed RSS feed
+        run: php bin/generate-transformed-rss.php
+
+      - name: Create Pages index
+        run: |
+          set -euo pipefail
+          cat > "${PAGES_OUTPUT_DIR}/index.html" <<HTML
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>GasConnect RSS Feed</title>
+            </head>
+            <body>
+              <h1>GasConnect RSS Feed</h1>
+              <p><a href="${PAGES_FEED_URL}">Open the RSS feed</a></p>
+            </body>
+          </html>
+          HTML
+          touch "${PAGES_OUTPUT_DIR}/.nojekyll"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: build/pages
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

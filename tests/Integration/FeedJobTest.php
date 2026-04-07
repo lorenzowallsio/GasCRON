@@ -1,0 +1,144 @@
+<?php
+
+declare(strict_types=1);
+
+namespace GasConnect\RssCron\Tests\Integration;
+
+use DateTimeZone;
+use DOMDocument;
+use DOMElement;
+use DOMXPath;
+use GasConnect\RssCron\Config;
+use GasConnect\RssCron\Exception\FeedParseException;
+use GasConnect\RssCron\Rss\AtomicFilePublisher;
+use GasConnect\RssCron\Rss\FeedJob;
+use GasConnect\RssCron\Rss\FetchedFeed;
+use GasConnect\RssCron\Tests\Support\FakeFeedFetcher;
+use GasConnect\RssCron\Tests\Support\FixtureLoader;
+use GasConnect\RssCron\Tests\Support\InMemoryLogger;
+use PHPUnit\Framework\TestCase;
+
+final class FeedJobTest extends TestCase
+{
+    private string $temporaryDirectory;
+
+    protected function setUp(): void
+    {
+        $this->temporaryDirectory = sys_get_temp_dir() . '/gasconnect-rss-' . bin2hex(random_bytes(6));
+        mkdir($this->temporaryDirectory, 0777, true);
+    }
+
+    protected function tearDown(): void
+    {
+        $files = glob($this->temporaryDirectory . '/*');
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                @unlink($file);
+            }
+        }
+
+        @rmdir($this->temporaryDirectory);
+    }
+
+    public function testJobGeneratesValidWallsIoCompatibleFeed(): void
+    {
+        $fixture = FixtureLoader::load('source-feed.xml');
+        $outputPath = $this->temporaryDirectory . '/gasconnect.xml';
+        $config = $this->buildConfig($outputPath);
+        $logger = new InMemoryLogger();
+        $job = new FeedJob(
+            fetcher: new FakeFeedFetcher(
+                static fn (string $_url, int $_timeout, array $_headers): FetchedFeed
+                    => new FetchedFeed($fixture, 200, 'application/rss+xml')
+            ),
+            publisher: new AtomicFilePublisher()
+        );
+
+        $result = $job->run($config, $logger);
+
+        self::assertSame(7, $result->sourceItemCount);
+        self::assertSame(5, $result->selectedItemCount);
+        self::assertSame(5, $result->publishedItemCount);
+        self::assertFileExists($outputPath);
+
+        $document = new DOMDocument();
+        $document->load($outputPath);
+
+        $items = $document->getElementsByTagName('item');
+        self::assertCount(5, $items);
+
+        $firstItem = $items->item(0);
+        self::assertInstanceOf(DOMElement::class, $firstItem);
+        self::assertSame('First published', $this->findDirectChildText($firstItem, 'title'));
+        self::assertSame('First published', $this->findDirectChildText($firstItem, 'author'));
+
+        foreach ($items as $item) {
+            self::assertInstanceOf(DOMElement::class, $item);
+            self::assertSame(
+                $this->findDirectChildText($item, 'title'),
+                $this->findDirectChildText($item, 'author')
+            );
+        }
+
+        $xpath = new DOMXPath($document);
+        $xpath->registerNamespace('atom', 'http://www.w3.org/2005/Atom');
+        $xpath->registerNamespace('dc', 'http://purl.org/dc/elements/1.1/');
+
+        $selfLink = $xpath->query('/rss/channel/atom:link[@rel="self"]/@href');
+        self::assertNotFalse($selfLink);
+        self::assertSame('https://example.com/feeds/gasconnect.xml', $selfLink->item(0)?->nodeValue);
+
+        self::assertGreaterThan(0, $xpath->query('/rss/channel/item/enclosure')->length);
+        self::assertGreaterThan(0, $xpath->query('/rss/channel/item/source')->length);
+        self::assertGreaterThan(0, $xpath->query('/rss/channel/item/dc:publisher')->length);
+    }
+
+    public function testJobKeepsPreviousOutputWhenParsingFails(): void
+    {
+        $outputPath = $this->temporaryDirectory . '/gasconnect.xml';
+        file_put_contents($outputPath, 'last-known-good');
+
+        $config = $this->buildConfig($outputPath);
+        $logger = new InMemoryLogger();
+        $job = new FeedJob(
+            fetcher: new FakeFeedFetcher(
+                static fn (string $_url, int $_timeout, array $_headers): FetchedFeed
+                    => new FetchedFeed('<rss><channel><item></rss>', 200, 'application/rss+xml')
+            ),
+            publisher: new AtomicFilePublisher()
+        );
+
+        $this->expectException(FeedParseException::class);
+        try {
+            $job->run($config, $logger);
+        } finally {
+            self::assertSame('last-known-good', file_get_contents($outputPath));
+        }
+    }
+
+    private function buildConfig(string $outputPath): Config
+    {
+        return new Config(
+            sourceUrl: 'https://customers.pressrelations.de/apps/nrx/bff/export/media_review/d70a6efc-7373-4f16-b6c5-7ec575b843f5',
+            outputPath: $outputPath,
+            publicFeedUrl: 'https://example.com/feeds/gasconnect.xml',
+            timezone: new DateTimeZone('Europe/Vienna'),
+            cronSchedule: '0 2 * * *',
+            fetchTimeoutSeconds: 15,
+            skipItemsWithEmptyTitle: true,
+            requestHeaders: [],
+            logLevel: 'info'
+        );
+    }
+
+    private function findDirectChildText(DOMElement $parent, string $localName): string
+    {
+        foreach ($parent->childNodes as $child) {
+            if ($child instanceof DOMElement && $child->localName === $localName) {
+                return trim($child->textContent);
+            }
+        }
+
+        return '';
+    }
+}

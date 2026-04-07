@@ -1,0 +1,6 @@
+.env
+/vendor/
+/output/
+/storage/
+/build/
+.DS_Store

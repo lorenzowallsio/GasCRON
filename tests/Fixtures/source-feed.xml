@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>news feed</title>
+    <link>https://customers.pressrelations.de/apps/nrx/example</link>
+    <description>Fixture feed for integration testing.</description>
+    <pubDate>Thu, 02 Apr 2026 12:05:00 +0000</pubDate>
+    <atom:link href="https://customers.pressrelations.de/apps/nrx/example" rel="self" type="application/rss+xml"/>
+    <ttl>14400</ttl>
+    <item>
+      <title>Third published</title>
+      <description>Third item description.</description>
+      <author>Publisher Three</author>
+      <source url="https://example.com/third">Publisher Three</source>
+      <link>https://example.com/third</link>
+      <guid>https://example.com/third</guid>
+      <pubDate>Wed, 01 Apr 2026 10:00:00 +0000</pubDate>
+      <category>Branche</category>
+      <dc:publisher>Publisher Three</dc:publisher>
+      <dc:coverage>100</dc:coverage>
+    </item>
+    <item>
+      <title>Seventh published</title>
+      <description>Seventh item description.</description>
+      <author>Publisher Seven</author>
+      <source url="https://example.com/seventh">Publisher Seven</source>
+      <link>https://example.com/seventh</link>
+      <guid>https://example.com/seventh</guid>
+      <pubDate>Mon, 30 Mar 2026 09:00:00 +0000</pubDate>
+      <category>Branche</category>
+      <dc:publisher>Publisher Seven</dc:publisher>
+      <dc:coverage>700</dc:coverage>
+    </item>
+    <item>
+      <title>First published</title>
+      <description>First item description.</description>
+      <source url="https://example.com/first">Publisher One</source>
+      <link>https://example.com/first</link>
+      <guid>https://example.com/first</guid>
+      <pubDate>Thu, 02 Apr 2026 12:00:00 +0000</pubDate>
+      <category>Branche</category>
+      <dc:publisher>Publisher One</dc:publisher>
+      <dc:coverage>1000</dc:coverage>
+    </item>
+    <item>
+      <title>Sixth published</title>
+      <description>Sixth item description.</description>
+      <author>Publisher Six</author>
+      <source url="https://example.com/sixth">Publisher Six</source>
+      <link>https://example.com/sixth</link>
+      <guid>https://example.com/sixth</guid>
+      <pubDate>Mon, 30 Mar 2026 12:00:00 +0000</pubDate>
+      <category>Branche</category>
+      <dc:publisher>Publisher Six</dc:publisher>
+      <dc:coverage>600</dc:coverage>
+    </item>
+    <item>
+      <title>Second published</title>
+      <description>Second item description.</description>
+      <author>Publisher Two</author>
+      <source url="https://example.com/second">Publisher Two</source>
+      <link>https://example.com/second</link>
+      <guid>https://example.com/second</guid>
+      <pubDate>Thu, 02 Apr 2026 11:00:00 +0000</pubDate>
+      <category>Branche</category>
+      <enclosure url="https://example.com/second.jpg" type="image/jpeg" length="0"/>
+      <dc:publisher>Publisher Two</dc:publisher>
+      <dc:coverage>200</dc:coverage>
+    </item>
+    <item>
+      <title>Fifth published</title>
+      <description>Fifth item description.</description>
+      <author>Publisher Five</author>
+      <source url="https://example.com/fifth">Publisher Five</source>
+      <link>https://example.com/fifth</link>
+      <guid>https://example.com/fifth</guid>
+      <pubDate>Tue, 31 Mar 2026 15:00:00 +0000</pubDate>
+      <category>Branche</category>
+      <dc:publisher>Publisher Five</dc:publisher>
+      <dc:coverage>500</dc:coverage>
+    </item>
+    <item>
+      <title>Fourth published</title>
+      <description>Fourth item description.</description>
+      <author>Publisher Four</author>
+      <source url="https://example.com/fourth">Publisher Four</source>
+      <link>https://example.com/fourth</link>
+      <guid>https://example.com/fourth</guid>
+      <pubDate>Wed, 01 Apr 2026 09:00:00 +0000</pubDate>
+      <category>Branche</category>
+      <dc:publisher>Publisher Four</dc:publisher>
+      <dc:coverage>400</dc:coverage>
+    </item>
+  </channel>
+</rss>
+
