@@ -24,7 +24,7 @@ final class FeedJobTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->temporaryDirectory = sys_get_temp_dir() . '/gasconnect-rss-' . bin2hex(random_bytes(6));
+        $this->temporaryDirectory = sys_get_temp_dir() . '/rss-feed-' . bin2hex(random_bytes(6));
         mkdir($this->temporaryDirectory, 0777, true);
     }
 
@@ -43,7 +43,7 @@ final class FeedJobTest extends TestCase
     public function testJobGeneratesValidWallsIoCompatibleFeed(): void
     {
         $fixture = FixtureLoader::load('source-feed.xml');
-        $outputPath = $this->temporaryDirectory . '/gasconnect.xml';
+        $outputPath = $this->temporaryDirectory . '/feed.xml';
         $config = $this->buildConfig($outputPath);
         $logger = new InMemoryLogger();
         $job = new FeedJob(
@@ -86,7 +86,7 @@ final class FeedJobTest extends TestCase
 
         $selfLink = $xpath->query('/rss/channel/atom:link[@rel="self"]/@href');
         self::assertNotFalse($selfLink);
-        self::assertSame('https://example.com/feeds/gasconnect.xml', $selfLink->item(0)?->nodeValue);
+        self::assertSame('https://example.com/feeds/feed.xml', $selfLink->item(0)?->nodeValue);
 
         self::assertGreaterThan(0, $xpath->query('/rss/channel/item/enclosure')->length);
         self::assertGreaterThan(0, $xpath->query('/rss/channel/item/source')->length);
@@ -95,7 +95,7 @@ final class FeedJobTest extends TestCase
 
     public function testJobKeepsPreviousOutputWhenParsingFails(): void
     {
-        $outputPath = $this->temporaryDirectory . '/gasconnect.xml';
+        $outputPath = $this->temporaryDirectory . '/feed.xml';
         file_put_contents($outputPath, 'last-known-good');
 
         $config = $this->buildConfig($outputPath);
@@ -121,7 +121,7 @@ final class FeedJobTest extends TestCase
         return new Config(
             sourceUrl: 'https://customers.pressrelations.de/apps/nrx/bff/export/media_review/d70a6efc-7373-4f16-b6c5-7ec575b843f5',
             outputPath: $outputPath,
-            publicFeedUrl: 'https://example.com/feeds/gasconnect.xml',
+            publicFeedUrl: 'https://example.com/feeds/feed.xml',
             timezone: new DateTimeZone('Europe/Vienna'),
             cronSchedule: '0 2 * * *',
             fetchTimeoutSeconds: 15,

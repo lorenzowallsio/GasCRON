@@ -50,7 +50,7 @@ jobs:
           mkdir -p "${GITHUB_WORKSPACE}/build/pages/feeds"
 
           source_url="${CUSTOM_RSS_SOURCE_URL:-https://customers.pressrelations.de/apps/nrx/bff/export/media_review/d70a6efc-7373-4f16-b6c5-7ec575b843f5}"
-          output_path="${GITHUB_WORKSPACE}/build/pages/feeds/gasconnect.xml"
+          output_path="${GITHUB_WORKSPACE}/build/pages/feeds/feed.xml"
           fetch_timeout="${CUSTOM_FETCH_TIMEOUT_SECONDS:-15}"
           skip_empty_title="${CUSTOM_SKIP_ITEMS_WITH_EMPTY_TITLE:-true}"
           request_headers_json="${CUSTOM_REQUEST_HEADERS_JSON:-{}}"
@@ -62,9 +62,9 @@ jobs:
             repo="${GITHUB_REPOSITORY#${owner}/}"
 
             if [[ "${repo,,}" == "${owner,,}.github.io" ]]; then
-              public_url="https://${owner}.github.io/feeds/gasconnect.xml"
+              public_url="https://${owner}.github.io/feeds/feed.xml"
             else
-              public_url="https://${owner}.github.io/${repo}/feeds/gasconnect.xml"
+              public_url="https://${owner}.github.io/${repo}/feeds/feed.xml"
             fi
           fi
 
@@ -107,10 +107,10 @@ jobs:
             <head>
               <meta charset="utf-8">
               <meta name="viewport" content="width=device-width, initial-scale=1">
-              <title>GasConnect RSS Feed</title>
+              <title>RSS Feed</title>
             </head>
             <body>
-              <h1>GasConnect RSS Feed</h1>
+              <h1>RSS Feed</h1>
               <p><a href="${PAGES_FEED_URL}">Open the RSS feed</a></p>
             </body>
           </html>

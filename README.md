@@ -1,4 +1,4 @@
-# GasConnect RSS Cron
+# RSS Cron Feed Publisher
 
 This project fetches an upstream RSS feed once per day, keeps the latest 5 items by `pubDate`, rewrites each selected item's `author` to match its `title`, and publishes the transformed RSS output for Walls.io.
 
@@ -56,8 +56,8 @@ This project includes a GitHub Actions workflow at `.github/workflows/publish-rs
 
 Default GitHub Pages feed URL patterns:
 
-- project repository: `https://<owner>.github.io/<repo>/feeds/gasconnect.xml`
-- user or organization site repository named `<owner>.github.io`: `https://<owner>.github.io/feeds/gasconnect.xml`
+- project repository: `https://<owner>.github.io/<repo>/feeds/feed.xml`
+- user or organization site repository named `<owner>.github.io`: `https://<owner>.github.io/feeds/feed.xml`
 
 Optional GitHub repository variables:
 
@@ -74,10 +74,10 @@ To use the workflow:
 2. If you are using GitHub Free, make the repository public.
 3. In GitHub, enable Pages and set the source to `GitHub Actions`.
 4. Run the workflow once manually to publish the first feed.
-5. Add the resulting `.../feeds/gasconnect.xml` URL to Walls.io.
+5. Add the resulting `.../feeds/feed.xml` URL to Walls.io.
 
 ## Notes
 
-- The placeholder public feed URL is `https://example.com/feeds/gasconnect.xml`.
+- The placeholder public feed URL is `https://example.com/feeds/feed.xml`.
 - The job preserves the previous published file if fetching, parsing, validation, or publishing fails.
 - Walls.io usually shows RSS items newer than 24 hours unless moderation is used.

@@ -15,7 +15,7 @@
 Example placeholder public URL:
 
 ```text
-https://example.com/feeds/gasconnect.xml
+https://example.com/feeds/feed.xml
 ```
 
 ## Cron
@@ -36,13 +36,13 @@ What it does:
 - runs on manual dispatch
 - runs on pushes to `main` or `master`
 - runs once daily at `02:00 Europe/Vienna`
-- generates the RSS file into `build/pages/feeds/gasconnect.xml`
+- generates the RSS file into `build/pages/feeds/feed.xml`
 - deploys that directory to GitHub Pages
 
 Default GitHub Pages URL behavior:
 
-- if the repository name is not `<owner>.github.io`, the feed URL becomes `https://<owner>.github.io/<repo>/feeds/gasconnect.xml`
-- if the repository name is `<owner>.github.io`, the feed URL becomes `https://<owner>.github.io/feeds/gasconnect.xml`
+- if the repository name is not `<owner>.github.io`, the feed URL becomes `https://<owner>.github.io/<repo>/feeds/feed.xml`
+- if the repository name is `<owner>.github.io`, the feed URL becomes `https://<owner>.github.io/feeds/feed.xml`
 
 Optional repository variables:
 
@@ -60,7 +60,7 @@ Setup steps in GitHub:
 3. Set `Build and deployment` -> `Source` to `GitHub Actions`.
 4. If needed, add repository variables under `Settings` -> `Secrets and variables` -> `Actions`.
 5. Run the `Publish RSS Feed to GitHub Pages` workflow manually once.
-6. Use the deployed `.../feeds/gasconnect.xml` URL in Walls.io.
+6. Use the deployed `.../feeds/feed.xml` URL in Walls.io.
 
 ## Publishing Behavior
 
