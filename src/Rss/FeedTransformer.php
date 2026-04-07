@@ -24,16 +24,32 @@ final class FeedTransformer
             }
 
             $titleElement = $this->findFirstDirectChild($clone, 'title');
-            $title = $titleElement === null ? '' : trim($titleElement->textContent);
+            $description = $this->findFirstChildText($clone, 'description');
 
-            if ($title === '' && $skipItemsWithEmptyTitle) {
-                $logger->warning('Skipping item with empty or missing title.', [
+            if ($description === '' && $skipItemsWithEmptyTitle) {
+                $logger->warning('Skipping item with empty or missing description because the transformed title would be empty.', [
                     'item_index' => $item->originalIndex,
                     'guid' => $this->findFirstChildText($clone, 'guid'),
                 ]);
 
                 continue;
             }
+
+            if ($titleElement === null) {
+                $titleElement = $clone->ownerDocument?->createElement('title');
+
+                if ($titleElement === null) {
+                    continue;
+                }
+
+                if ($clone->firstChild !== null) {
+                    $clone->insertBefore($titleElement, $clone->firstChild);
+                } else {
+                    $clone->appendChild($titleElement);
+                }
+            }
+
+            $this->replaceElementText($titleElement, $description);
 
             $authorElement = $this->findFirstDirectChild($clone, 'author');
             if ($authorElement === null) {
@@ -43,22 +59,27 @@ final class FeedTransformer
                     continue;
                 }
 
-                if ($titleElement !== null && $titleElement->nextSibling !== null) {
+                if ($titleElement->nextSibling !== null) {
                     $clone->insertBefore($authorElement, $titleElement->nextSibling);
                 } else {
                     $clone->appendChild($authorElement);
                 }
             }
 
-            while ($authorElement->firstChild !== null) {
-                $authorElement->removeChild($authorElement->firstChild);
-            }
-
-            $authorElement->appendChild($clone->ownerDocument->createTextNode($title));
+            $this->replaceElementText($authorElement, $description);
             $transformed[] = $clone;
         }
 
         return $transformed;
+    }
+
+    private function replaceElementText(DOMElement $element, string $value): void
+    {
+        while ($element->firstChild !== null) {
+            $element->removeChild($element->firstChild);
+        }
+
+        $element->appendChild($element->ownerDocument->createTextNode($value));
     }
 
     private function findFirstDirectChild(DOMElement $parent, string $localName): ?DOMElement
@@ -79,4 +100,3 @@ final class FeedTransformer
         return $child === null ? '' : trim($child->textContent);
     }
 }
-

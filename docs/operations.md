@@ -71,4 +71,4 @@ Setup steps in GitHub:
 
 ## Walls.io
 
-Configure the generated HTTPS URL as an RSS source in Walls.io. The feed keeps item `title`, `link`, `pubDate`, and optional metadata, while rewriting each published `author` to match the item `title`.
+Configure the generated HTTPS URL as an RSS source in Walls.io. The feed replaces each item `title` with the item `description`, keeps `link`, `pubDate`, and optional metadata, and rewrites each published `author` to match the transformed `title`.

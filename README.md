@@ -1,6 +1,6 @@
 # RSS Cron Feed Publisher
 
-This project fetches an upstream RSS feed once per day, keeps the latest 5 items by `pubDate`, rewrites each selected item's `author` to match its `title`, and publishes the transformed RSS output for Walls.io.
+This project fetches an upstream RSS feed once per day, keeps the latest 5 items by `pubDate`, replaces each selected item's `title` with its `description`, rewrites `author` to match that transformed `title`, and publishes the transformed RSS output for Walls.io.
 
 ## Requirements
 
@@ -18,7 +18,7 @@ Copy `.env.example` to `.env` and update the values:
 - `RSS_TIMEZONE`: execution timezone, defaults to `Europe/Vienna`
 - `RSS_CRON_SCHEDULE`: documentation-only cron expression, defaults to `0 2 * * *`
 - `RSS_FETCH_TIMEOUT_SECONDS`: HTTP timeout, defaults to `15`
-- `RSS_SKIP_ITEMS_WITH_EMPTY_TITLE`: `true` to skip items with blank or missing titles
+- `RSS_SKIP_ITEMS_WITH_EMPTY_TITLE`: `true` to skip items whose transformed title would be blank because `description` is empty or missing
 - `RSS_REQUEST_HEADERS_JSON`: optional JSON object of request headers
 - `LOG_LEVEL`: `debug`, `info`, `warning`, or `error`
 

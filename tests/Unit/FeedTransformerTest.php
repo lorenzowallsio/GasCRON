@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 final class FeedTransformerTest extends TestCase
 {
-    public function testTransformCreatesAuthorWhenMissingAndCopiesTitleIntoIt(): void
+    public function testTransformCreatesAuthorAndReplacesTitleWithDescription(): void
     {
         $xml = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -24,7 +24,8 @@ final class FeedTransformerTest extends TestCase
     <link>https://example.com/feed</link>
     <description>Example</description>
     <item>
-      <title>Created author</title>
+      <title>Original title</title>
+      <description>Replacement description</description>
       <guid>1</guid>
       <pubDate>Thu, 02 Apr 2026 12:00:00 +0000</pubDate>
     </item>
@@ -41,11 +42,12 @@ XML;
         self::assertCount(1, $transformed);
         $author = $this->findDirectChild($transformed[0], 'author');
         self::assertInstanceOf(DOMElement::class, $author);
-        self::assertSame('Created author', $author->textContent);
-        self::assertSame('Created author', $this->findDirectChild($transformed[0], 'title')?->textContent);
+        self::assertSame('Replacement description', $author->textContent);
+        self::assertSame('Replacement description', $this->findDirectChild($transformed[0], 'title')?->textContent);
+        self::assertSame('Replacement description', $this->findDirectChild($transformed[0], 'description')?->textContent);
     }
 
-    public function testTransformSkipsBlankTitleWhenConfiguredToSkip(): void
+    public function testTransformSkipsBlankDescriptionWhenConfiguredToSkip(): void
     {
         $xml = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -55,7 +57,8 @@ XML;
     <link>https://example.com/feed</link>
     <description>Example</description>
     <item>
-      <title>   </title>
+      <title>Original</title>
+      <description>   </description>
       <author>Original</author>
       <guid>1</guid>
       <pubDate>Thu, 02 Apr 2026 12:00:00 +0000</pubDate>
@@ -77,7 +80,7 @@ XML;
         ));
     }
 
-    public function testTransformCanKeepBlankTitleAndWriteEmptyAuthorWhenConfigured(): void
+    public function testTransformCanKeepBlankDescriptionAndWriteEmptyTitleAndAuthorWhenConfigured(): void
     {
         $xml = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -87,7 +90,8 @@ XML;
     <link>https://example.com/feed</link>
     <description>Example</description>
     <item>
-      <title></title>
+      <title>Original</title>
+      <description></description>
       <author>Original</author>
       <guid>1</guid>
       <pubDate>Thu, 02 Apr 2026 12:00:00 +0000</pubDate>
@@ -103,6 +107,7 @@ XML;
         $transformed = (new FeedTransformer())->transform($selected, false, $logger);
 
         self::assertCount(1, $transformed);
+        self::assertSame('', $this->findDirectChild($transformed[0], 'title')?->textContent);
         self::assertSame('', $this->findDirectChild($transformed[0], 'author')?->textContent);
     }
 
@@ -117,4 +122,3 @@ XML;
         return null;
     }
 }
-
