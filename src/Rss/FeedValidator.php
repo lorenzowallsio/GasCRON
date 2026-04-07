@@ -13,7 +13,7 @@ final class FeedValidator
 {
     private const ATOM_NAMESPACE = 'http://www.w3.org/2005/Atom';
 
-    public function validate(string $xml, string $publicFeedUrl): void
+    public function validate(string $xml, string $publicFeedUrl, string $channelTitleOverride): void
     {
         if (trim($xml) === '') {
             throw new FeedValidationException('Generated RSS XML is empty.');
@@ -55,6 +55,13 @@ final class FeedValidator
             throw new FeedValidationException('Generated RSS XML is missing a channel element.');
         }
 
+        if ($channelTitleOverride !== '') {
+            $channelTitle = $this->findFirstChildText($channel, 'title');
+            if ($channelTitle !== $channelTitleOverride) {
+                throw new FeedValidationException('Generated RSS XML has the wrong channel title.');
+            }
+        }
+
         $items = [];
         foreach ($channel->childNodes as $child) {
             if ($child instanceof DOMElement && $child->localName === 'item') {
@@ -70,6 +77,7 @@ final class FeedValidator
             $title = $this->findFirstChildText($item, 'title');
             $description = $this->findFirstChildText($item, 'description');
             $author = $this->findFirstChildText($item, 'author');
+            $creator = $this->findFirstChildText($item, 'creator');
 
             if ($title !== $description) {
                 throw new FeedValidationException(
@@ -80,6 +88,18 @@ final class FeedValidator
             if ($author === '') {
                 throw new FeedValidationException(
                     sprintf('Generated item %d is missing an author value.', $index + 1)
+                );
+            }
+
+            if ($creator === '') {
+                throw new FeedValidationException(
+                    sprintf('Generated item %d is missing a dc:creator value.', $index + 1)
+                );
+            }
+
+            if ($creator !== $author) {
+                throw new FeedValidationException(
+                    sprintf('Generated item %d has author/dc:creator mismatch.', $index + 1)
                 );
             }
         }

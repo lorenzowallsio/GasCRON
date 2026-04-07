@@ -14,8 +14,12 @@ final class FeedGenerator
     /**
      * @param list<DOMElement> $items
      */
-    public function generate(ParsedFeed $parsedFeed, array $items, string $publicFeedUrl): string
-    {
+    public function generate(
+        ParsedFeed $parsedFeed,
+        array $items,
+        string $publicFeedUrl,
+        string $channelTitleOverride
+    ): string {
         $document = new DOMDocument('1.0', 'UTF-8');
         $document->preserveWhiteSpace = false;
         $document->formatOutput = true;
@@ -63,6 +67,13 @@ final class FeedGenerator
 
             $copy = $document->importNode($child, true);
             if ($copy instanceof DOMElement
+                && $copy->localName === 'title'
+                && $channelTitleOverride !== ''
+            ) {
+                $this->replaceElementText($copy, $channelTitleOverride);
+            }
+
+            if ($copy instanceof DOMElement
                 && $copy->namespaceURI === self::ATOM_NAMESPACE
                 && $copy->localName === 'link'
                 && strtolower($copy->getAttribute('rel')) === 'self'
@@ -73,6 +84,17 @@ final class FeedGenerator
 
             if ($copy !== false) {
                 $channel->appendChild($copy);
+            }
+        }
+
+        if ($channelTitleOverride !== '' && !$this->hasDirectChild($channel, 'title')) {
+            $titleElement = $document->createElement('title');
+            $this->replaceElementText($titleElement, $channelTitleOverride);
+
+            if ($channel->firstChild !== null) {
+                $channel->insertBefore($titleElement, $channel->firstChild);
+            } else {
+                $channel->appendChild($titleElement);
             }
         }
 
@@ -92,5 +114,25 @@ final class FeedGenerator
         }
 
         return $document->saveXML() ?: '';
+    }
+
+    private function replaceElementText(DOMElement $element, string $value): void
+    {
+        while ($element->firstChild !== null) {
+            $element->removeChild($element->firstChild);
+        }
+
+        $element->appendChild($element->ownerDocument->createTextNode($value));
+    }
+
+    private function hasDirectChild(DOMElement $parent, string $localName): bool
+    {
+        foreach ($parent->childNodes as $child) {
+            if ($child instanceof DOMElement && $child->localName === $localName) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

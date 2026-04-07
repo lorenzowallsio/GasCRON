@@ -79,6 +79,7 @@ final class FeedJobTest extends TestCase
         self::assertInstanceOf(DOMElement::class, $firstItem);
         self::assertSame('First item description.', $this->findDirectChildText($firstItem, 'title'));
         self::assertSame('First published', $this->findDirectChildText($firstItem, 'author'));
+        self::assertSame('First published', $this->findDirectChildText($firstItem, 'creator'));
         self::assertSame('First item description.', $this->findDirectChildText($firstItem, 'description'));
 
         foreach ($items as $index => $item) {
@@ -91,11 +92,17 @@ final class FeedJobTest extends TestCase
                 $expectedAuthors[$index],
                 $this->findDirectChildText($item, 'author')
             );
+            self::assertSame(
+                $expectedAuthors[$index],
+                $this->findDirectChildText($item, 'creator')
+            );
         }
 
         $xpath = new DOMXPath($document);
         $xpath->registerNamespace('atom', 'http://www.w3.org/2005/Atom');
         $xpath->registerNamespace('dc', 'http://purl.org/dc/elements/1.1/');
+
+        self::assertSame('Gasconnect RSS', $xpath->evaluate('string(/rss/channel/title)'));
 
         $selfLink = $xpath->query('/rss/channel/atom:link[@rel="self"]/@href');
         self::assertNotFalse($selfLink);
@@ -103,6 +110,7 @@ final class FeedJobTest extends TestCase
 
         self::assertGreaterThan(0, $xpath->query('/rss/channel/item/enclosure')->length);
         self::assertGreaterThan(0, $xpath->query('/rss/channel/item/source')->length);
+        self::assertCount(5, $xpath->query('/rss/channel/item/dc:creator'));
         self::assertGreaterThan(0, $xpath->query('/rss/channel/item/dc:publisher')->length);
     }
 
@@ -135,6 +143,7 @@ final class FeedJobTest extends TestCase
             sourceUrl: 'https://customers.pressrelations.de/apps/nrx/bff/export/media_review/d70a6efc-7373-4f16-b6c5-7ec575b843f5',
             outputPath: $outputPath,
             publicFeedUrl: 'https://example.com/feeds/feed.xml',
+            channelTitleOverride: 'Gasconnect RSS',
             timezone: new DateTimeZone('Europe/Vienna'),
             cronSchedule: '0 2 * * *',
             fetchTimeoutSeconds: 15,

@@ -11,6 +11,7 @@
 - `RSS_SOURCE_URL`
 - `RSS_OUTPUT_PATH`
 - `RSS_PUBLIC_FEED_URL`
+- `RSS_CHANNEL_TITLE_OVERRIDE`
 
 Example placeholder public URL:
 
@@ -48,6 +49,7 @@ Optional repository variables:
 
 - `RSS_SOURCE_URL`
 - `RSS_PUBLIC_FEED_URL`
+- `RSS_CHANNEL_TITLE_OVERRIDE`
 - `RSS_FETCH_TIMEOUT_SECONDS`
 - `RSS_SKIP_ITEMS_WITH_EMPTY_TITLE`
 - `RSS_REQUEST_HEADERS_JSON`
@@ -71,4 +73,4 @@ Setup steps in GitHub:
 
 ## Walls.io
 
-Configure the generated HTTPS URL as an RSS source in Walls.io. The feed replaces each item `title` with the item `description`, keeps `description`, `link`, `pubDate`, and optional metadata, and rewrites each published `author` to the original item `title`.
+Configure the generated HTTPS URL as an RSS source in Walls.io. The feed overrides the channel title to `Gasconnect RSS`, replaces each item `title` with the item `description`, keeps `description`, `link`, `pubDate`, and optional metadata, and rewrites each published `author` and `dc:creator` to the original item `title`.

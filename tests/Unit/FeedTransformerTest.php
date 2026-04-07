@@ -41,8 +41,11 @@ XML;
 
         self::assertCount(1, $transformed);
         $author = $this->findDirectChild($transformed[0], 'author');
+        $creator = $this->findDirectChild($transformed[0], 'creator');
         self::assertInstanceOf(DOMElement::class, $author);
+        self::assertInstanceOf(DOMElement::class, $creator);
         self::assertSame('Original title', $author->textContent);
+        self::assertSame('Original title', $creator->textContent);
         self::assertSame('Replacement description', $this->findDirectChild($transformed[0], 'title')?->textContent);
         self::assertSame('Replacement description', $this->findDirectChild($transformed[0], 'description')?->textContent);
     }
@@ -109,6 +112,7 @@ XML;
         self::assertCount(1, $transformed);
         self::assertSame('', $this->findDirectChild($transformed[0], 'title')?->textContent);
         self::assertSame('Original', $this->findDirectChild($transformed[0], 'author')?->textContent);
+        self::assertSame('Original', $this->findDirectChild($transformed[0], 'creator')?->textContent);
     }
 
     private function findDirectChild(DOMElement $parent, string $localName): ?DOMElement

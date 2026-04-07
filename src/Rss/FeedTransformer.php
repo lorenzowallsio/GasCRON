@@ -9,6 +9,8 @@ use GasConnect\RssCron\Support\Logger;
 
 final class FeedTransformer
 {
+    private const DC_NAMESPACE = 'http://purl.org/dc/elements/1.1/';
+
     /**
      * @param list<ParsedItem> $items
      * @return list<DOMElement>
@@ -68,6 +70,22 @@ final class FeedTransformer
             }
 
             $this->replaceElementText($authorElement, $originalTitle);
+            $creatorElement = $this->findFirstDirectChild($clone, 'creator');
+            if ($creatorElement === null) {
+                $creatorElement = $clone->ownerDocument?->createElementNS(self::DC_NAMESPACE, 'dc:creator');
+
+                if ($creatorElement === null) {
+                    continue;
+                }
+
+                if ($authorElement->nextSibling !== null) {
+                    $clone->insertBefore($creatorElement, $authorElement->nextSibling);
+                } else {
+                    $clone->appendChild($creatorElement);
+                }
+            }
+
+            $this->replaceElementText($creatorElement, $originalTitle);
             $transformed[] = $clone;
         }
 

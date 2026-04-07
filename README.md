@@ -1,6 +1,6 @@
 # RSS Cron Feed Publisher
 
-This project fetches an upstream RSS feed once per day, keeps the latest 5 items by `pubDate`, replaces each selected item's `title` with its `description`, rewrites `author` to the original `title`, and publishes the transformed RSS output for Walls.io.
+This project fetches an upstream RSS feed once per day, keeps the latest 5 items by `pubDate`, replaces each selected item's `title` with its `description`, rewrites both `author` and `dc:creator` to the original `title`, overrides the channel title to `Gasconnect RSS`, and publishes the transformed RSS output for Walls.io.
 
 ## Requirements
 
@@ -15,6 +15,7 @@ Copy `.env.example` to `.env` and update the values:
 - `RSS_SOURCE_URL`: upstream Pressrelations feed URL
 - `RSS_OUTPUT_PATH`: absolute filesystem path to the published XML file
 - `RSS_PUBLIC_FEED_URL`: public HTTPS URL for the published feed
+- `RSS_CHANNEL_TITLE_OVERRIDE`: feed-level channel title override, defaults to `Gasconnect RSS`
 - `RSS_TIMEZONE`: execution timezone, defaults to `Europe/Vienna`
 - `RSS_CRON_SCHEDULE`: documentation-only cron expression, defaults to `0 2 * * *`
 - `RSS_FETCH_TIMEOUT_SECONDS`: HTTP timeout, defaults to `15`
@@ -63,6 +64,7 @@ Optional GitHub repository variables:
 
 - `RSS_SOURCE_URL`
 - `RSS_PUBLIC_FEED_URL`
+- `RSS_CHANNEL_TITLE_OVERRIDE`
 - `RSS_FETCH_TIMEOUT_SECONDS`
 - `RSS_SKIP_ITEMS_WITH_EMPTY_TITLE`
 - `RSS_REQUEST_HEADERS_JSON`

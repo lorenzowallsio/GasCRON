@@ -16,6 +16,7 @@ final class Config
         public readonly string $sourceUrl,
         public readonly string $outputPath,
         public readonly string $publicFeedUrl,
+        public readonly string $channelTitleOverride,
         public readonly DateTimeZone $timezone,
         public readonly string $cronSchedule,
         public readonly int $fetchTimeoutSeconds,
@@ -88,6 +89,7 @@ final class Config
             sourceUrl: $sourceUrl,
             outputPath: $outputPath,
             publicFeedUrl: $publicFeedUrl,
+            channelTitleOverride: self::stringOrDefault($environment, 'RSS_CHANNEL_TITLE_OVERRIDE', 'Gasconnect RSS'),
             timezone: $timezone,
             cronSchedule: self::stringOrDefault($environment, 'RSS_CRON_SCHEDULE', '0 2 * * *'),
             fetchTimeoutSeconds: $timeout,
@@ -154,4 +156,3 @@ final class Config
         };
     }
 }
-

@@ -87,8 +87,17 @@ final class FeedJob
             throw new FeedValidationException('No publishable items remain after transformation. Keeping previous published feed unchanged.');
         }
 
-        $generatedXml = $this->generator->generate($parsedFeed, $transformedItems, $config->publicFeedUrl);
-        $this->validator->validate($generatedXml, $config->publicFeedUrl);
+        $generatedXml = $this->generator->generate(
+            $parsedFeed,
+            $transformedItems,
+            $config->publicFeedUrl,
+            $config->channelTitleOverride
+        );
+        $this->validator->validate(
+            $generatedXml,
+            $config->publicFeedUrl,
+            $config->channelTitleOverride
+        );
         $writtenBytes = $this->publisher->publish($generatedXml, $config->outputPath);
 
         $durationMs = (int) round((microtime(true) - $startedAt) * 1000);

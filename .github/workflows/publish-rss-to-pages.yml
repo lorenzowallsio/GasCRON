@@ -40,6 +40,7 @@ jobs:
         env:
           CUSTOM_RSS_SOURCE_URL: ${{ vars.RSS_SOURCE_URL }}
           CUSTOM_PUBLIC_FEED_URL: ${{ vars.RSS_PUBLIC_FEED_URL }}
+          CUSTOM_CHANNEL_TITLE_OVERRIDE: ${{ vars.RSS_CHANNEL_TITLE_OVERRIDE }}
           CUSTOM_FETCH_TIMEOUT_SECONDS: ${{ vars.RSS_FETCH_TIMEOUT_SECONDS }}
           CUSTOM_SKIP_ITEMS_WITH_EMPTY_TITLE: ${{ vars.RSS_SKIP_ITEMS_WITH_EMPTY_TITLE }}
           CUSTOM_REQUEST_HEADERS_JSON: ${{ vars.RSS_REQUEST_HEADERS_JSON }}
@@ -51,6 +52,7 @@ jobs:
 
           source_url="${CUSTOM_RSS_SOURCE_URL:-https://customers.pressrelations.de/apps/nrx/bff/export/media_review/d70a6efc-7373-4f16-b6c5-7ec575b843f5}"
           output_path="${GITHUB_WORKSPACE}/build/pages/feeds/feed.xml"
+          channel_title_override="${CUSTOM_CHANNEL_TITLE_OVERRIDE:-Gasconnect RSS}"
           fetch_timeout="${CUSTOM_FETCH_TIMEOUT_SECONDS:-15}"
           skip_empty_title="${CUSTOM_SKIP_ITEMS_WITH_EMPTY_TITLE:-true}"
           request_headers_json="${CUSTOM_REQUEST_HEADERS_JSON:-{}}"
@@ -72,6 +74,7 @@ jobs:
             echo "RSS_SOURCE_URL=${source_url}"
             echo "RSS_OUTPUT_PATH=${output_path}"
             echo "RSS_PUBLIC_FEED_URL=${public_url}"
+            echo "RSS_CHANNEL_TITLE_OVERRIDE=${channel_title_override}"
             echo "RSS_TIMEZONE=Europe/Vienna"
             echo "RSS_CRON_SCHEDULE=0 2 * * *"
             echo "RSS_FETCH_TIMEOUT_SECONDS=${fetch_timeout}"
