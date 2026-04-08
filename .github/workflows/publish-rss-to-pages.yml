@@ -7,8 +7,8 @@ on:
       - main
       - master
   schedule:
-    - cron: '0 2 * * *'
-      timezone: 'Europe/Vienna'
+    - cron: '0 8,13 * * *'
+      timezone: 'Europe/Rome'
 
 concurrency:
   group: github-pages-rss-feed
@@ -75,8 +75,8 @@ jobs:
             echo "RSS_OUTPUT_PATH=${output_path}"
             echo "RSS_PUBLIC_FEED_URL=${public_url}"
             echo "RSS_CHANNEL_TITLE_OVERRIDE=${channel_title_override}"
-            echo "RSS_TIMEZONE=Europe/Vienna"
-            echo "RSS_CRON_SCHEDULE=0 2 * * *"
+            echo "RSS_TIMEZONE=Europe/Rome"
+            echo "RSS_CRON_SCHEDULE=0 8,13 * * *"
             echo "RSS_FETCH_TIMEOUT_SECONDS=${fetch_timeout}"
             echo "RSS_SKIP_ITEMS_WITH_EMPTY_TITLE=${skip_empty_title}"
             echo "LOG_LEVEL=${log_level}"

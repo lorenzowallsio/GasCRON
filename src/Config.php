@@ -47,7 +47,7 @@ final class Config
             throw new ConfigurationException('RSS_OUTPUT_PATH must be an absolute path.');
         }
 
-        $timezoneName = self::stringOrDefault($environment, 'RSS_TIMEZONE', 'Europe/Vienna');
+        $timezoneName = self::stringOrDefault($environment, 'RSS_TIMEZONE', 'Europe/Rome');
 
         try {
             $timezone = new DateTimeZone($timezoneName);
@@ -91,7 +91,7 @@ final class Config
             publicFeedUrl: $publicFeedUrl,
             channelTitleOverride: self::stringOrDefault($environment, 'RSS_CHANNEL_TITLE_OVERRIDE', 'Gasconnect RSS'),
             timezone: $timezone,
-            cronSchedule: self::stringOrDefault($environment, 'RSS_CRON_SCHEDULE', '0 2 * * *'),
+            cronSchedule: self::stringOrDefault($environment, 'RSS_CRON_SCHEDULE', '0 8,13 * * *'),
             fetchTimeoutSeconds: $timeout,
             skipItemsWithEmptyTitle: self::boolOrDefault($environment, 'RSS_SKIP_ITEMS_WITH_EMPTY_TITLE', true),
             requestHeaders: $normalizedHeaders,
