@@ -54,22 +54,8 @@ final class FeedTransformer
 
             $this->replaceElementText($titleElement, $description);
 
-            $authorElement = $this->findFirstDirectChild($clone, 'author');
-            if ($authorElement === null) {
-                $authorElement = $clone->ownerDocument?->createElement('author');
+            $this->removeDirectChildren($clone, 'author');
 
-                if ($authorElement === null) {
-                    continue;
-                }
-
-                if ($titleElement->nextSibling !== null) {
-                    $clone->insertBefore($authorElement, $titleElement->nextSibling);
-                } else {
-                    $clone->appendChild($authorElement);
-                }
-            }
-
-            $this->replaceElementText($authorElement, $originalTitle);
             $creatorElement = $this->findFirstDirectChild($clone, 'creator');
             if ($creatorElement === null) {
                 $creatorElement = $clone->ownerDocument?->createElementNS(self::DC_NAMESPACE, 'dc:creator');
@@ -78,14 +64,16 @@ final class FeedTransformer
                     continue;
                 }
 
-                if ($authorElement->nextSibling !== null) {
-                    $clone->insertBefore($creatorElement, $authorElement->nextSibling);
+                $insertAfter = $this->findFirstDirectChild($clone, 'description') ?? $titleElement;
+                if ($insertAfter->nextSibling !== null) {
+                    $clone->insertBefore($creatorElement, $insertAfter->nextSibling);
                 } else {
                     $clone->appendChild($creatorElement);
                 }
             }
 
             $this->replaceElementText($creatorElement, $originalTitle);
+            $this->normalizeDcNamespaceDeclarations($clone);
             $transformed[] = $clone;
         }
 
@@ -99,6 +87,27 @@ final class FeedTransformer
         }
 
         $element->appendChild($element->ownerDocument->createTextNode($value));
+    }
+
+    private function removeDirectChildren(DOMElement $parent, string $localName): void
+    {
+        while (($child = $this->findFirstDirectChild($parent, $localName)) !== null) {
+            $parent->removeChild($child);
+        }
+    }
+
+    private function normalizeDcNamespaceDeclarations(DOMElement $item): void
+    {
+        foreach ($item->childNodes as $child) {
+            if (!$child instanceof DOMElement || $child->namespaceURI !== self::DC_NAMESPACE || $child->prefix !== 'dc') {
+                continue;
+            }
+
+            $child->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:dc', self::DC_NAMESPACE);
+        }
+
+        $item->removeAttributeNS('http://www.w3.org/2000/xmlns/', 'dc');
+        $item->removeAttribute('xmlns:dc');
     }
 
     private function findFirstDirectChild(DOMElement $parent, string $localName): ?DOMElement

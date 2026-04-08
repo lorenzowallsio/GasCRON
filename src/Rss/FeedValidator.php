@@ -76,7 +76,6 @@ final class FeedValidator
         foreach ($items as $index => $item) {
             $title = $this->findFirstChildText($item, 'title');
             $description = $this->findFirstChildText($item, 'description');
-            $author = $this->findFirstChildText($item, 'author');
             $creator = $this->findFirstChildText($item, 'creator');
 
             if ($title !== $description) {
@@ -85,21 +84,15 @@ final class FeedValidator
                 );
             }
 
-            if ($author === '') {
+            if ($this->hasDirectChild($item, 'author')) {
                 throw new FeedValidationException(
-                    sprintf('Generated item %d is missing an author value.', $index + 1)
+                    sprintf('Generated item %d should not contain an author element.', $index + 1)
                 );
             }
 
             if ($creator === '') {
                 throw new FeedValidationException(
                     sprintf('Generated item %d is missing a dc:creator value.', $index + 1)
-                );
-            }
-
-            if ($creator !== $author) {
-                throw new FeedValidationException(
-                    sprintf('Generated item %d has author/dc:creator mismatch.', $index + 1)
                 );
             }
         }
@@ -127,5 +120,16 @@ final class FeedValidator
         }
 
         return '';
+    }
+
+    private function hasDirectChild(DOMElement $parent, string $localName): bool
+    {
+        foreach ($parent->childNodes as $child) {
+            if ($child instanceof DOMElement && $child->localName === $localName) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

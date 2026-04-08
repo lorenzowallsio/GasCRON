@@ -67,7 +67,7 @@ final class FeedJobTest extends TestCase
         $items = $document->getElementsByTagName('item');
         self::assertCount(5, $items);
 
-        $expectedAuthors = [
+        $expectedCreators = [
             'First published',
             'Second published',
             'Third published',
@@ -78,8 +78,8 @@ final class FeedJobTest extends TestCase
         $firstItem = $items->item(0);
         self::assertInstanceOf(DOMElement::class, $firstItem);
         self::assertSame('First item description.', $this->findDirectChildText($firstItem, 'title'));
-        self::assertSame('First published', $this->findDirectChildText($firstItem, 'author'));
         self::assertSame('First published', $this->findDirectChildText($firstItem, 'creator'));
+        self::assertSame('', $this->findDirectChildText($firstItem, 'author'));
         self::assertSame('First item description.', $this->findDirectChildText($firstItem, 'description'));
 
         foreach ($items as $index => $item) {
@@ -88,12 +88,9 @@ final class FeedJobTest extends TestCase
                 $this->findDirectChildText($item, 'description'),
                 $this->findDirectChildText($item, 'title')
             );
+            self::assertSame('', $this->findDirectChildText($item, 'author'));
             self::assertSame(
-                $expectedAuthors[$index],
-                $this->findDirectChildText($item, 'author')
-            );
-            self::assertSame(
-                $expectedAuthors[$index],
+                $expectedCreators[$index],
                 $this->findDirectChildText($item, 'creator')
             );
         }
@@ -111,7 +108,16 @@ final class FeedJobTest extends TestCase
         self::assertGreaterThan(0, $xpath->query('/rss/channel/item/enclosure')->length);
         self::assertGreaterThan(0, $xpath->query('/rss/channel/item/source')->length);
         self::assertCount(5, $xpath->query('/rss/channel/item/dc:creator'));
+        self::assertCount(0, $xpath->query('/rss/channel/item/author'));
         self::assertGreaterThan(0, $xpath->query('/rss/channel/item/dc:publisher')->length);
+
+        $xml = file_get_contents($outputPath);
+        self::assertIsString($xml);
+        self::assertStringNotContainsString('<author>', $xml);
+        self::assertStringContainsString(
+            '<dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">First published</dc:creator>',
+            $xml
+        );
     }
 
     public function testJobKeepsPreviousOutputWhenParsingFails(): void

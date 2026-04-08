@@ -73,4 +73,4 @@ Setup steps in GitHub:
 
 ## Walls.io
 
-Configure the generated HTTPS URL as an RSS source in Walls.io. The feed overrides the channel title to `Gasconnect RSS`, replaces each item `title` with the item `description`, keeps `description`, `link`, `pubDate`, and optional metadata, and rewrites each published `author` and `dc:creator` to the original item `title`.
+Configure the generated HTTPS URL as an RSS source in Walls.io. The feed overrides the channel title to `Gasconnect RSS`, replaces each item `title` with the item `description`, keeps `description`, `link`, `pubDate`, and optional metadata, removes item `author`, and rewrites each published `dc:creator` to the original item `title`.
