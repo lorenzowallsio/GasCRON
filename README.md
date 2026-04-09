@@ -17,7 +17,7 @@ Copy `.env.example` to `.env` and update the values:
 - `RSS_PUBLIC_FEED_URL`: public HTTPS URL for the published feed
 - `RSS_CHANNEL_TITLE_OVERRIDE`: feed-level channel title override, defaults to `Gasconnect RSS`
 - `RSS_TIMEZONE`: execution timezone, defaults to `Europe/Rome`
-- `RSS_CRON_SCHEDULE`: documentation-only cron expression, defaults to `0 8,13 * * *`
+- `RSS_CRON_SCHEDULE`: documentation-only schedule string, defaults to `37 7 * * *; 11 13 * * *`
 - `RSS_FETCH_TIMEOUT_SECONDS`: HTTP timeout, defaults to `15`
 - `RSS_SKIP_ITEMS_WITH_EMPTY_TITLE`: `true` to skip items whose transformed title would be blank because `description` is empty or missing
 - `RSS_REQUEST_HEADERS_JSON`: optional JSON object of request headers
@@ -35,7 +35,8 @@ Cron example:
 
 ```cron
 CRON_TZ=Europe/Rome
-0 8,13 * * * php /path/to/bin/generate-transformed-rss.php >> /var/log/rss-transform.log 2>&1
+37 7 * * * php /path/to/bin/generate-transformed-rss.php >> /var/log/rss-transform.log 2>&1
+11 13 * * * php /path/to/bin/generate-transformed-rss.php >> /var/log/rss-transform.log 2>&1
 ```
 
 ## Testing
@@ -51,7 +52,7 @@ composer test
 
 This project includes a GitHub Actions workflow at `.github/workflows/publish-rss-to-pages.yml` that can:
 
-- run twice per day at `08:00` and `13:00 Europe/Rome`
+- run twice per day at `07:37` and `13:11 Europe/Rome`
 - run manually with `workflow_dispatch`
 - publish the generated RSS feed to GitHub Pages
 

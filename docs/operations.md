@@ -21,11 +21,12 @@ https://example.com/feeds/feed.xml
 
 ## Cron
 
-Use a timezone-aware cron entry so the job runs at `08:00` and `13:00 Europe/Rome`:
+Use timezone-aware cron entries so the job runs at `07:37` and `13:11 Europe/Rome`:
 
 ```cron
 CRON_TZ=Europe/Rome
-0 8,13 * * * php /path/to/bin/generate-transformed-rss.php >> /var/log/rss-transform.log 2>&1
+37 7 * * * php /path/to/bin/generate-transformed-rss.php >> /var/log/rss-transform.log 2>&1
+11 13 * * * php /path/to/bin/generate-transformed-rss.php >> /var/log/rss-transform.log 2>&1
 ```
 
 ## GitHub Actions + GitHub Pages
@@ -36,7 +37,7 @@ What it does:
 
 - runs on manual dispatch
 - runs on pushes to `main` or `master`
-- runs twice daily at `08:00` and `13:00 Europe/Rome`
+- runs twice daily at `07:37` and `13:11 Europe/Rome`
 - generates the RSS file into `build/pages/feeds/feed.xml`
 - deploys that directory to GitHub Pages
 
