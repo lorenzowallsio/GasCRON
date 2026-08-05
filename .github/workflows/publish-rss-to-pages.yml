@@ -2,6 +2,11 @@ name: Publish RSS Feed to GitHub Pages
 
 on:
   workflow_dispatch:
+    inputs:
+      force_keepalive:
+        description: 'Push a keepalive commit even if main was recently active'
+        type: boolean
+        default: false
   push:
     branches:
       - main
@@ -22,9 +27,48 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+
+      - name: Keep scheduled workflow alive
+        if: github.event_name == 'schedule' || inputs.force_keepalive
+        env:
+          KEEPALIVE_MAX_COMMIT_AGE_DAYS: '14'
+          FORCE_KEEPALIVE: ${{ inputs.force_keepalive }}
+        run: |
+          set -euo pipefail
+
+          # GitHub disables schedule triggers in public repositories after 60 days
+          # without repository activity. Scheduled runs do not count as activity,
+          # so refresh the clock with a dated commit whenever main goes quiet.
+          last_commit_epoch="$(git log -1 --format=%ct)"
+          age_days=$(( ( $(date -u +%s) - last_commit_epoch ) / 86400 ))
+
+          if [[ "${FORCE_KEEPALIVE:-false}" != "true" ]] && (( age_days < KEEPALIVE_MAX_COMMIT_AGE_DAYS )); then
+            echo "Last commit is ${age_days}d old (< ${KEEPALIVE_MAX_COMMIT_AGE_DAYS}d); no keepalive needed."
+            exit 0
+          fi
+
+          date -u +'%Y-%m-%dT%H:%M:%SZ' > .github/keepalive
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/keepalive
+
+          if git diff --cached --quiet; then
+            echo "Keepalive timestamp unchanged; nothing to commit."
+            exit 0
+          fi
+
+          # Commits pushed with the default GITHUB_TOKEN do not trigger new
+          # workflow runs, so this cannot loop back into this workflow.
+          git commit -m 'Refresh scheduled workflow keepalive [skip ci]'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+          echo "Pushed keepalive commit after ${age_days}d of inactivity."
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

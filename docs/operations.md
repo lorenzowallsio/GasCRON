@@ -40,6 +40,36 @@ What it does:
 - runs twice daily at `07:37` and `13:11 Europe/Rome`
 - generates the RSS file into `build/pages/feeds/feed.xml`
 - deploys that directory to GitHub Pages
+- keeps its own schedule alive (see below)
+
+## Scheduled Workflow Keepalive
+
+GitHub disables `schedule` triggers in public repositories after 60 days without
+repository activity. Scheduled runs do not count as activity, so a cron-only
+repository silently switches itself off. This happened on 2026-07-31: the
+workflow was disabled with state `disabled_inactivity`, the feed froze at the
+last successful run, and GitHub Pages kept serving that stale file with
+`HTTP 200` and no error signal.
+
+The `Keep scheduled workflow alive` step prevents a repeat. On scheduled runs it
+checks the age of the newest commit on the default branch and, once that exceeds
+`KEEPALIVE_MAX_COMMIT_AGE_DAYS` (14), writes a UTC timestamp to
+`.github/keepalive` and pushes it. That push counts as repository activity and
+resets GitHub's 60-day clock, leaving roughly a 4x safety margin.
+
+Notes:
+
+- The `build` job needs `permissions: contents: write` for that push.
+- Commits pushed with the default `GITHUB_TOKEN` do not trigger new workflow
+  runs, so the keepalive cannot loop back into this workflow. The commit message
+  also carries `[skip ci]`.
+- To verify the push path without waiting 14 days, dispatch the workflow
+  manually with `force_keepalive` set to `true`.
+
+If the workflow is ever disabled again, re-enable it under `Actions` -> the
+workflow -> `Enable workflow`, or with `gh workflow enable`, then dispatch one
+run to refresh the published feed. Watch for GitHub's
+"will be disabled soon" email; treat it as a prompt to act, not a countdown.
 
 Default GitHub Pages URL behavior:
 
